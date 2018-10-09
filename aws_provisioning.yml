@@ -36,3 +36,19 @@
           rules_egress:
             - proto: all
               cidr_ip: 0.0.0.0/0
+
+    - name: Launch the new EC2 Instance
+      ec2:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        group: "{{ security_group }}"
+        instance_type: "{{ instance_type }}"
+        image: "{{ image }}"
+        wait: true
+        # The wait parameter instructs the Ansible to wait for the instance to
+        # get created before reporting that the task is complete.
+        region: "{{ region }}"
+        keypair: "{{ keypair }}"
+        count: "{{ count }}"
+      register: ec2
+      # register a variable called ec2. Gives us access to the instance id, the public IP etc.
