@@ -10,7 +10,7 @@
       # 29:a9:e0:d3:65:01:c2:7b:28:8d:f5:f9:ba:60:d2:1a:40:e7:02:89
     region: us-east-1
     count: 1
-  var_files:
+  vars_files:
     - aws_keys.yml
 
   tasks:
@@ -34,7 +34,7 @@
             from_port: 443
             to_port: 443
             cidr_ip: 0.0.0.0/0
-          rules_egress:
+        rules_egress:
             - proto: all
               cidr_ip: 0.0.0.0/0
 
@@ -90,6 +90,6 @@
     with_items:
       - python-devel
       - httpd
-      
+
   - name: start httpd
     service: name=httpd state=running
