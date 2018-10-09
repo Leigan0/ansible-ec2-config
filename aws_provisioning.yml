@@ -70,4 +70,10 @@
       args:
         tags:
           Type: webserver
-          
+
+    - name: Wait for SSH to come up
+      wait_for:
+        host: " {{ item.public_ip }}"
+        port: 22
+        state: started
+      with_items: " {{ ec2.instances }}"
