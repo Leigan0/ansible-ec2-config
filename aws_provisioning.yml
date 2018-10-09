@@ -12,72 +12,80 @@
     count: 1
   vars_files:
     - aws_keys.yml
-
+  pre_tasks:
+  - name: Ensure boto and boto3 modules are installed
+    pip:
+      name: "{{ item }}"
+    with_items:
+    - boto3
+    - botocore
   tasks:
-    - name: Create a security group
-      ec2_group:
-        name: "{{ security_group }}"
-        description: The webservers security group
-        region: "{{ region }}"
-        aws_access_key: "{{ aws_access_key }}"
-        aws_secret_key: "{{ aws_secret_key}}"
-        rules:
-          - proto: tcp
-            from_port: 22
-            to_port: 80
-            cidr_ip: 0.0.0.0/0
-          - proto: tcp
-            from_port: 80
-            to_port: 80
-            cidr_ip: 0.0.0.0/0
-          - proto: tcp
-            from_port: 443
-            to_port: 443
-            cidr_ip: 0.0.0.0/0
-        rules_egress:
-            - proto: all
+      - command: which python
+      - command: "python -c 'import boto3; print(boto3.__version__)'"
+      - name: Create a security group
+        ec2_group:
+          name: "{{ security_group }}"
+          description: The webservers security group
+          region: "{{ region }}"
+          aws_access_key: "{{ aws_access_key }}"
+          aws_secret_key: "{{ aws_secret_key}}"
+          rules:
+            - proto: tcp
+              from_port: 22
+              to_port: 80
               cidr_ip: 0.0.0.0/0
+            - proto: tcp
+              from_port: 80
+              to_port: 80
+              cidr_ip: 0.0.0.0/0
+            - proto: tcp
+              from_port: 443
+              to_port: 443
+              cidr_ip: 0.0.0.0/0
+          rules_egress:
+              - proto: all
+                cidr_ip: 0.0.0.0/0
 
-    - name: Launch the new EC2 Instance
-      ec2:
-        aws_access_key: "{{ aws_access_key }}"
-        aws_secret_key: "{{ aws_secret_key }}"
-        group: "{{ security_group }}"
-        instance_type: "{{ instance_type }}"
-        image: "{{ image }}"
-        wait: true
-        # The wait parameter instructs the Ansible to wait for the instance to
-        # get created before reporting that the task is complete.
-        region: "{{ region }}"
-        keypair: "{{ keypair }}"
-        count: "{{ count }}"
-      register: ec2
-      # register a variable called ec2. Gives us access to the instance id, the public IP etc.
+      - name: Launch the new EC2 Instance
+        ec2:
+          aws_access_key: "{{ aws_access_key }}"
+          aws_secret_key: "{{ aws_secret_key }}"
+          group: "{{ security_group }}"
+          instance_type: "{{ instance_type }}"
+          image: "{{ image }}"
+          wait: true
+          # The wait parameter instructs the Ansible to wait for the instance to
+          # get created before reporting that the task is complete.
+          region: "{{ region }}"
+          keypair: "{{ keypair }}"
+          count: "{{ count }}"
+        register: ec2
+        # register a variable called ec2. Gives us access to the instance id, the public IP etc.
 
-    - name: Add the newly created host so that we can contact it later
-      add_host: # allows you to add one or more hosts to a group
-        name: "{{ item.public_ip }}"
-        groups: webservers
-      # with_items. Takes the instances list in the ec2 variable.  Each instance can be referred to by item.
-      with_items: "{{ ec2.instances }}"
+      - name: Add the newly created host so that we can contact it later
+        add_host: # allows you to add one or more hosts to a group
+          name: "{{ item.public_ip }}"
+          groups: webservers
+        # with_items. Takes the instances list in the ec2 variable.  Each instance can be referred to by item.
+        with_items: "{{ ec2.instances }}"
 
-    - name: Add tags to instance(s)
-      ec2_tag:
-        aws_access_key: "{{ aws_access_key }}"
-        aws_secret_key: "{{ aws_secret_key }}"
-        resource: "{{ item.id }}"
-        state: "present"
-      with_items: "{{ ec2.instances }}"
-      args:
-        tags:
-          Type: webserver
+      - name: Add tags to instance(s)
+        ec2_tag:
+          aws_access_key: "{{ aws_access_key }}"
+          aws_secret_key: "{{ aws_secret_key }}"
+          resource: "{{ item.id }}"
+          state: "present"
+        with_items: "{{ ec2.instances }}"
+        args:
+          tags:
+            Type: webserver
 
-    - name: Wait for SSH to come up
-      wait_for:
-        host: " {{ item.public_ip }}"
-        port: 22
-        state: started
-      with_items: " {{ ec2.instances }}"
+      - name: Wait for SSH to come up
+        wait_for:
+          host: " {{ item.public_ip }}"
+          port: 22
+          state: started
+        with_items: " {{ ec2.instances }}"
 
 - hosts: webservers
   remote_user: root
@@ -85,11 +93,10 @@
   gather_facts: no
 
   tasks:
-  - name: Install python & httpd
-    yum: pkg={{item}} state=installed
-    with_items:
-      - python-devel
-      - httpd
-
-  - name: start httpd
-    service: name=httpd state=running
+      - name: Install python & httpd
+        yum: pkg={{item}} state=installed
+        with_items:
+          - python-devel
+          - httpd
+      - name: start httpd
+        service: name=httpd state=running
