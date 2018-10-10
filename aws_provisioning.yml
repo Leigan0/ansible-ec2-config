@@ -6,7 +6,7 @@
     instance_type: t2.micro
     security_group: webservers_sg
     image: ami-0922553b7b0369273
-    keypair: ansible-kp
+    keypair: ansible-kp2
       # 29:a9:e0:d3:65:01:c2:7b:28:8d:f5:f9:ba:60:d2:1a:40:e7:02:89
     region: us-east-1
     count: 1
