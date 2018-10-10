@@ -20,8 +20,6 @@
     - boto3
     - botocore
   tasks:
-      - command: which python
-      - command: "python -c 'import boto3; print(boto3.__version__)'"
       - name: Create a security group
         ec2_group:
           name: "{{ security_group }}"
