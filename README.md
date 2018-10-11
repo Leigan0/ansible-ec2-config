@@ -10,7 +10,7 @@ Script can also terminate instance.
 
 To run 
 
-`$ ansible-playbook -i hosts -v --ask-vault-pass build-ec2.yml`
+`$ ansible-playbook -i hosts -v --ask-vault-pass site.yml`
 
 To Terminate 
 
