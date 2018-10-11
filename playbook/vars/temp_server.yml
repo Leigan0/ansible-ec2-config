@@ -1,0 +1,12 @@
+---
+temp_server:
+  instance_type: t2.micro
+  security_group: webservers_sg
+  image: ami-0922553b7b0369273
+  keypair: ansible-kp2
+  user: ec2-user
+  region: us-east-1
+  count: 1
+  tags:
+    Type: webserver
+    Name: Test
